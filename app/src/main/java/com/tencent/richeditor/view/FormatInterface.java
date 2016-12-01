@@ -1,5 +1,7 @@
 package com.tencent.richeditor.view;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by quinn on 11/30/16.
  */
@@ -22,10 +24,17 @@ public interface FormatInterface {
 
     public boolean containStrikeThrough(int start, int end);
 
-    public void addCheckBox();
+    public void addCheckBox(int start, boolean check);
 
+    public void addPhoto(int start, Bitmap bitmap);
 
+    public void bullet(int start, int end, boolean format);
 
+    public boolean containBullet(int start, int end);
+
+    public void number(int start, int end, boolean format);
+
+    public boolean containNumber(int start, int end);
 
 
 }

@@ -1,40 +1,41 @@
 package com.tencent.richeditor;
 
-import android.graphics.Typeface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
-import android.text.style.BulletSpan;
-import android.text.style.ClickableSpan;
-import android.text.style.ImageSpan;
-import android.text.style.StrikethroughSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
-import com.tencent.richeditor.span.CheckBoxSpan;
+import com.tencent.richeditor.span.ColorCricleBulletSpan;
+import com.tencent.richeditor.view.RivenText;
+import com.tencent.richeditor.view.SelectableImageButton;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import static com.tencent.richeditor.R.id.photo;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
 
-    private EditText editText;
+    public static final int CHOOSE_PICTURE = 100;
+
+    private RivenText rivenText;
     private Button format;
     private int start;
     private int end;
-    private ImageButton boldBtn;
-    private ImageButton italicBtn;
-    private ImageButton underlineBtn;
-    private ImageButton strikethroughBtn;
+    private SelectableImageButton boldBtn;
+    private SelectableImageButton italicBtn;
+    private SelectableImageButton underlineBtn;
+    private SelectableImageButton strikethroughBtn;
     private ImageButton imageBtn;
     private ImageButton checkBoxBtn;
     private ImageButton colorBtn;
@@ -48,13 +49,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        editText = (EditText) findViewById(R.id.edittext);
+        rivenText = (RivenText) findViewById(R.id.edittext);
 
-        boldBtn = (ImageButton) findViewById(R.id.bold);
-        italicBtn = (ImageButton) findViewById(R.id.italic);
-        underlineBtn = (ImageButton) findViewById(R.id.underline);
-        strikethroughBtn = (ImageButton) findViewById(R.id.strikethrough);
-        imageBtn = (ImageButton) findViewById(R.id.photo);
+        boldBtn = (SelectableImageButton) findViewById(R.id.bold);
+        italicBtn = (SelectableImageButton) findViewById(R.id.italic);
+        underlineBtn = (SelectableImageButton) findViewById(R.id.underline);
+        strikethroughBtn = (SelectableImageButton) findViewById(R.id.strikethrough);
+        imageBtn = (ImageButton) findViewById(photo);
         colorBtn = (ImageButton) findViewById(R.id.color);
         quoteBtn = (ImageButton) findViewById(R.id.quote);
         clearBtn = (ImageButton) findViewById(R.id.clear);
@@ -148,73 +149,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        rivenText.setSelectChangeListener(new RivenText.SelectChangeListener() {
+            @Override
+            public void select(int start, int end) {
+                if(start != end && end > start) {
+                    updateIconState(start, end);
+                }
+            }
+        });
 
 
 
     }
 
     private void bold() {
-        editText.getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        rivenText.bold(start, end, !boldBtn.isCheck());
     }
 
     private void italic() {
-        editText.getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        rivenText.italic(start, end, !italicBtn.isCheck());
     }
 
     private void underline() {
-        editText.getEditableText().setSpan(new UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        rivenText.underLine(start, end, !underlineBtn.isCheck());
     }
 
     private void strikethrough() {
-        editText.getEditableText().setSpan(new StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        rivenText.strikeThrough(start, end, !strikethroughBtn.isCheck());
     }
 
     private void addPhoto() {
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("image");
-        final ImageSpan span = new ImageSpan(this, R.mipmap.ic_launcher);
-        spannableStringBuilder.setSpan(span, 0, spannableStringBuilder.length() , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableStringBuilder.setSpan(new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                Log.i(TAG, "onClick  Photo");
-                Toast.makeText(getApplicationContext(), "onClick  Photo", Toast.LENGTH_SHORT).show();
-            }
-        }, 0, spannableStringBuilder.length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        editText.setMovementMethod(LinkMovementMethod.getInstance());
-        editText.getEditableText().insert(start, spannableStringBuilder);
+        Intent openAlbumIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        openAlbumIntent.setType("image/*");
+        startActivityForResult(openAlbumIntent, CHOOSE_PICTURE);
     }
 
     private void addCheckBox(int start, boolean check) {
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("checkboxspan");
-        final CheckBoxSpan span = new CheckBoxSpan(this, check);
-        spannableStringBuilder.setSpan(span, 0, spannableStringBuilder.length() , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        spannableStringBuilder.setSpan(new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                Log.i(TAG, "onClick  Checkbox span start = " + spannableStringBuilder.getSpanStart(span));
-                CheckBoxSpan[] checkBoxSpens = editText.getEditableText().getSpans(0, editText.getEditableText().length(), CheckBoxSpan.class);
-                if(checkBoxSpens != null && checkBoxSpens.length > 0) {
-                    for(CheckBoxSpan checkBoxSpan : checkBoxSpens) {
-                        // 直接Span.getStart拿到的值不是最新的
-                        int spanStart = editText.getEditableText().getSpanStart(checkBoxSpan);
-                        int spanEnd = editText.getEditableText().getSpanEnd(checkBoxSpan);
-                        Log.i(TAG, "checkBoxSpan start " +  spanStart + " end = " + editText.getEditableText().getSpanEnd(checkBoxSpan)
-                         + " focus = " + editText.getSelectionStart());
-                        if(span == checkBoxSpan) {
-                            Log.i(TAG, "You clcik me");
-                            editText.getEditableText().removeSpan(span);
-                            editText.getEditableText().replace(spanStart,spanEnd, "");
-                            addCheckBox(spanStart, !span.isChecked());
-                            break;
-                        }
-                    }
-                }
-                Toast.makeText(getApplicationContext(), "onClick  Checkbox", Toast.LENGTH_SHORT).show();
-            }
-        }, 0, spannableStringBuilder.length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        editText.setMovementMethod(LinkMovementMethod.getInstance());
-        editText.getEditableText().insert(start, spannableStringBuilder);
+        rivenText.addCheckBox(start, check);
     }
 
 
@@ -226,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void bullet() {
-        editText.getEditableText().setSpan(new BulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        rivenText.bullet(new ColorCricleBulletSpan(), start, end, true);
     }
 
     private void number() {
@@ -241,19 +212,52 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void updateIconState(int start, int end) {
+        Log.i(TAG, "updateIconState start = " + start + " end = " + end);
+        boldBtn.setCheck(rivenText.cantainBold(start, end));
+        italicBtn.setCheck(rivenText.containItalic(start, end));
+        underlineBtn.setCheck(rivenText.containUnderLine(start, end));
+        strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
+    }
+
     /**
      * {@link Html#fromHtml(String)} 自动将html 转化为span
      */
     private void htmlToSpan() {
         Spanned s = Html.fromHtml("<font color=\"red\">Red Char</font>");
-        editText.setText(s);
+        rivenText.setText(s);
     }
 
     private void updateSelectArea() {
-        start = editText.getSelectionStart();
-        end = editText.getSelectionEnd();
+        start = rivenText.getSelectionStart();
+        end = rivenText.getSelectionEnd();
         Log.i(TAG, "Select start = " + start + " end = " + end);
     }
 
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        if (resultCode != RESULT_OK)
+            return;
+        switch (requestCode) {
+            case CHOOSE_PICTURE:
+                Uri uri = data.getData();
+                try {
+                    Bitmap bitmap;
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),
+                            uri);
+                    rivenText.addPhoto(rivenText.getSelectionStart(), bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            default:
+                break;
+        }
+
+    }
 
 }

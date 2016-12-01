@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import com.tencent.richeditor.R;
+import com.tencent.richeditor.utils.UIUtils;
 
 /**
  * Created by quinn on 11/29/16.
@@ -27,14 +28,23 @@ public class SelectableImageButton extends android.support.v7.widget.AppCompatIm
         super(context, attrs, defStyleAttr);
     }
 
-    private boolean isCheck() {
+    public boolean isCheck() {
         return selected;
+    }
+
+    public void setCheck(boolean check) {
+        selected = check;
+        if(selected) {
+            this.setBackgroundColor(UIUtils.getColorWrapper(getContext(), R.color.colorAccent));
+        } else {
+            this.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 
     private void toggle() {
         selected = !selected;
         if(selected) {
-            this.setBackgroundColor(getContext().getColor(R.color.colorAccent));
+            this.setBackgroundColor(UIUtils.getColorWrapper(getContext(), R.color.colorAccent));
         } else {
             this.setBackgroundColor(Color.TRANSPARENT);
         }
@@ -42,11 +52,6 @@ public class SelectableImageButton extends android.support.v7.widget.AppCompatIm
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_UP) {
-            toggle();
-        }
-
         return super.onTouchEvent(event);
-
     }
 }
