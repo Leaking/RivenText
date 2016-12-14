@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import com.tencent.richeditor.span.ColorCricleBulletSpan;
 import com.tencent.richeditor.view.RivenText;
 import com.tencent.richeditor.view.SelectableImageButton;
 
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void bullet() {
-        rivenText.bullet(new ColorCricleBulletSpan(), start, end, true);
+        rivenText.bullet(start, end, true);
     }
 
     private void number() {

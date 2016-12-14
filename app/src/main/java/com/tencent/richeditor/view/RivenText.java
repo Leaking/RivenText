@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.tencent.richeditor.span.CheckBoxSpan;
 import com.tencent.richeditor.span.ColorCricleBulletSpan;
+import com.tencent.richeditor.utils.UIUtils;
 
 /**
  * Created by quinn on 11/30/16.
@@ -27,6 +28,8 @@ import com.tencent.richeditor.span.ColorCricleBulletSpan;
 public class RivenText extends android.support.v7.widget.AppCompatEditText implements FormatInterface {
 
     public static final String TAG = "RivenText";
+
+    private String LINE_DIVIDER = "\n";
 
     private SelectChangeListener selectChangeListener;
 
@@ -221,6 +224,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public void addPhoto(int start, Bitmap bitmap) {
+        bitmap = resizeBitmap(bitmap);
         final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("imageSpan");
         ImageSpan imageSpan = new ImageSpan(getContext(), bitmap);
         spannableStringBuilder.setSpan(imageSpan, 0, spannableStringBuilder.length() , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -230,7 +234,10 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public void bullet(int start, int end, boolean format) {
+        String content = content();
+        Log.i(TAG, content.split("\n").length + "");
         getEditableText().setSpan(new ColorCricleBulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        testColorCricleBulletSpan();
     }
 
     @Override
@@ -271,6 +278,29 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         this.selectChangeListener = selectChangeListener;
     }
 
+    private Bitmap resizeBitmap(Bitmap bitmap) {
+        float bmpRatio = (float)bitmap.getWidth() / (float)bitmap.getHeight();
+        int screenWidth = UIUtils.getScreenWidth(getContext());
+        if(bitmap.getWidth() > screenWidth) {
+            int scaledWidth  = screenWidth;
+            int scaledHeight = (int)((float)screenWidth / bmpRatio);
+            bitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth , scaledHeight, false);
+        }
+        return bitmap;
+    }
+
+    private String content() {
+        return getEditableText().toString();
+    }
+
+    private void testColorCricleBulletSpan() {
+        ColorCricleBulletSpan[] spans = getEditableText().getSpans(0, getEditableText().length(), ColorCricleBulletSpan.class);
+        for(ColorCricleBulletSpan span: spans) {
+            int start = getEditableText().getSpanStart(span);
+            int end = getEditableText().getSpanEnd(span);
+            Log.i(TAG, "start = " + start + " end = " + end);
+        }
+    }
 
 
 }
