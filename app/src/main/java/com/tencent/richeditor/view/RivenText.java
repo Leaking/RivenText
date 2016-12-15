@@ -21,6 +21,8 @@ import com.tencent.richeditor.span.CheckBoxSpan;
 import com.tencent.richeditor.span.ColorCricleBulletSpan;
 import com.tencent.richeditor.utils.UIUtils;
 
+import java.util.Arrays;
+
 /**
  * Created by quinn on 11/30/16.
  */
@@ -29,7 +31,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     public static final String TAG = "RivenText";
 
-    private String LINE_DIVIDER = "\n";
+    private String LINE_FEED = "\n";
 
     private SelectChangeListener selectChangeListener;
 
@@ -235,9 +237,32 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     public void bullet(int start, int end, boolean format) {
         String content = content();
-        Log.i(TAG, content.split("\n").length + "");
-        getEditableText().setSpan(new ColorCricleBulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        Log.i(TAG, "bullet start = " + start + " end = " + end);
+        int nextLineFeedOfStart = content.indexOf(this.LINE_FEED, start);
+        int nextLineFeedOfEnd = content.indexOf(this.LINE_FEED, end);
+        Log.i(TAG, "nextLineFeedOfStart = " + nextLineFeedOfStart + " nextLineFeedOfEnd = " + nextLineFeedOfEnd);
+        //设置当前行
+        if(nextLineFeedOfStart == nextLineFeedOfEnd) {
+            int lineFeedBeforeStart = content.substring(0, start).lastIndexOf(LINE_FEED);
+            if(lineFeedBeforeStart == -1) {
+                lineFeedBeforeStart = 0;
+            } else {
+                lineFeedBeforeStart += 1;
+            }
+            int lineFeedAfterEnd = content.substring(start).indexOf(LINE_FEED);
+            if(lineFeedAfterEnd == -1) {
+                lineFeedAfterEnd = content.length() - 1;
+            }
+            start = lineFeedBeforeStart;
+            end = lineFeedAfterEnd;
+            Log.i(TAG, "Line start = " + start + " end = " + end);
+        } else {
+            bullet(start, nextLineFeedOfStart - 1, true);
+            bullet(nextLineFeedOfStart + 1, end, true);
+        }
+        //设置多行
 //        testColorCricleBulletSpan();
+        getEditableText().setSpan(new ColorCricleBulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     @Override
@@ -264,7 +289,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         super.onSelectionChanged(selStart, selEnd);
-        Log.i(TAG, "onSelectionChanged start = " + selStart + " end = " + selEnd);
+        Log.i(TAG, "onSelectionChanged start = " + selStart + " end = " + selEnd + " lenght = " + getEditableText().toString().length());
         if(selectChangeListener != null) {
             selectChangeListener.select(selStart, selEnd);
         }
@@ -300,6 +325,10 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
             int end = getEditableText().getSpanEnd(span);
             Log.i(TAG, "start = " + start + " end = " + end);
         }
+        Log.i(TAG, "split = " + Arrays.toString(getEditableText().toString().split(LINE_FEED)));
+        int length = getEditableText().toString().length();
+        Log.i(TAG, "lenght = " + length);
+        Log.i(TAG, "last one = " + getEditableText().toString().substring(length));
     }
 
 
