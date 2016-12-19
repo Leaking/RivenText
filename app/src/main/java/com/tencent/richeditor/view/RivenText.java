@@ -332,4 +332,10 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     }
 
 
+    @Override
+    protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+        super.onTextChanged(text, start, lengthBefore, lengthAfter);
+        Log.i(TAG, "onTextChanged ");
+        setSelection(getText().toString().length());
+    }
 }
