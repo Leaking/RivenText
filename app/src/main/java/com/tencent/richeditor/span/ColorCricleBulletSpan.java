@@ -18,7 +18,7 @@ public class ColorCricleBulletSpan extends BulletSpan {
     private final boolean mWantColor;
     private final int mColor;
 
-    public static final int OFFSET_HORIZON = 40;
+    public static final int OFFSET_HORIZON = 5;
     private static final int BULLET_RADIUS = 8;
     private static Path sBulletPath = null;
     public static final int STANDARD_GAP_WIDTH = OFFSET_HORIZON + 15;

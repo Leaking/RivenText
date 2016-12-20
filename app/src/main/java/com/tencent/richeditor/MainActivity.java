@@ -211,12 +211,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateIconState(int start, int end) {
         Log.i(TAG, "updateIconState start = " + start + " end = " + end);
-        if(start != end) {
-            boldBtn.setCheck(rivenText.cantainBold(start, end));
-            italicBtn.setCheck(rivenText.containItalic(start, end));
-            underlineBtn.setCheck(rivenText.containUnderLine(start, end));
-            strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
-        }
+        boldBtn.setCheck(rivenText.cantainBold(start, end));
+        italicBtn.setCheck(rivenText.containItalic(start, end));
+        underlineBtn.setCheck(rivenText.containUnderLine(start, end));
+        strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
         bulletBtn.setCheck(rivenText.containBullet(start, end));
     }
 

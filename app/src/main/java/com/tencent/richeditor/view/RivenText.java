@@ -314,7 +314,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     protected void onSelectionChanged(int selStart, int selEnd) {
         super.onSelectionChanged(selStart, selEnd);
         Log.i(TAG, "onSelectionChanged start = " + selStart + " end = " + selEnd + " lenght = " + getEditableText().toString().length());
-        if(selectChangeListener != null) {
+        if(selectChangeListener != null && selStart >= 0 && selEnd >= 0) {
             selectChangeListener.select(selStart, selEnd);
         }
     }
