@@ -30,6 +30,8 @@ public interface FormatInterface {
 
     public void bullet(int start, int end, boolean format);
 
+    public void clearBullet(int start, int end);
+
     public boolean containBullet(int start, int end);
 
     public void number(int start, int end, boolean format);

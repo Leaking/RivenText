@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton colorBtn;
     private ImageButton quoteBtn;
     private ImageButton clearBtn;
-    private ImageButton bulletBtn;
+    private SelectableImageButton bulletBtn;
     private ImageButton numericBtn;
     private ImageButton linkBtn;
 
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         colorBtn = (ImageButton) findViewById(R.id.color);
         quoteBtn = (ImageButton) findViewById(R.id.quote);
         clearBtn = (ImageButton) findViewById(R.id.clear);
-        bulletBtn = (ImageButton) findViewById(R.id.bullet);
+        bulletBtn = (SelectableImageButton) findViewById(R.id.bullet);
         numericBtn = (ImageButton) findViewById(R.id.number);
         linkBtn = (ImageButton) findViewById(R.id.link);
         checkBoxBtn = (ImageButton) findViewById(R.id.checkbox);
@@ -151,9 +151,7 @@ public class MainActivity extends AppCompatActivity {
         rivenText.setSelectChangeListener(new RivenText.SelectChangeListener() {
             @Override
             public void select(int start, int end) {
-                if(start != end && end > start) {
-                    updateIconState(start, end);
-                }
+                updateIconState(start, end);
             }
         });
 
@@ -196,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void bullet() {
-        rivenText.bullet(start, end, true);
+        rivenText.bullet(start, end, !bulletBtn.isCheck());
     }
 
     private void number() {
@@ -213,10 +211,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateIconState(int start, int end) {
         Log.i(TAG, "updateIconState start = " + start + " end = " + end);
-        boldBtn.setCheck(rivenText.cantainBold(start, end));
-        italicBtn.setCheck(rivenText.containItalic(start, end));
-        underlineBtn.setCheck(rivenText.containUnderLine(start, end));
-        strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
+        if(start != end) {
+            boldBtn.setCheck(rivenText.cantainBold(start, end));
+            italicBtn.setCheck(rivenText.containItalic(start, end));
+            underlineBtn.setCheck(rivenText.containUnderLine(start, end));
+            strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
+        }
+        bulletBtn.setCheck(rivenText.containBullet(start, end));
     }
 
     /**

@@ -33,6 +33,8 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     private String LINE_FEED = "\n";
 
+    private int lastLineCount = 1;
+
     private SelectChangeListener selectChangeListener;
 
     public RivenText(Context context) {
@@ -236,41 +238,63 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public void bullet(int start, int end, boolean format) {
-        String content = content();
-        Log.i(TAG, "bullet start = " + start + " end = " + end);
-        int nextLineFeedOfStart = content.indexOf(this.LINE_FEED, start);
-        int nextLineFeedOfEnd = content.indexOf(this.LINE_FEED, end);
-        Log.i(TAG, "nextLineFeedOfStart = " + nextLineFeedOfStart + " nextLineFeedOfEnd = " + nextLineFeedOfEnd);
-        //设置当前行
-        if(nextLineFeedOfStart == nextLineFeedOfEnd) {
-            int lineFeedBeforeStart = content.substring(0, start).lastIndexOf(LINE_FEED);
-            if(lineFeedBeforeStart == -1) {
-                lineFeedBeforeStart = 0;
+        if(format) {
+            String content = content();
+            Log.i(TAG, "Try to bullet start = " + start + " end = " + end);
+            int nextLineFeedOfStart = content.indexOf(this.LINE_FEED, start);
+            int nextLineFeedOfEnd = content.indexOf(this.LINE_FEED, end);
+            Log.i(TAG, "nextLineFeedOfStart = " + nextLineFeedOfStart + " nextLineFeedOfEnd = " + nextLineFeedOfEnd);
+            //设置当前行
+            if (nextLineFeedOfStart == nextLineFeedOfEnd) {
+                Log.i(TAG, "Bullet the same line");
+                int lineFeedBeforeStart = findLastLineStart(start);
+                int lineFeedAfterEnd = findNextLineFeed(end);
+                start = lineFeedBeforeStart;
+                end = lineFeedAfterEnd;
+                Log.i(TAG, "Line start = " + start + " end = " + end);
             } else {
-                lineFeedBeforeStart += 1;
+                Log.i(TAG, "Bullet splited line");
+                bullet(start, nextLineFeedOfStart - 1, true);
+                bullet(nextLineFeedOfStart + 1, end, true);
+                return;
             }
-            int lineFeedAfterEnd = content.substring(start).indexOf(LINE_FEED);
-            if(lineFeedAfterEnd == -1) {
-                lineFeedAfterEnd = content.length() - 1;
-            }
-            start = lineFeedBeforeStart;
-            end = lineFeedAfterEnd;
-            Log.i(TAG, "Line start = " + start + " end = " + end);
+            getEditableText().setSpan(new ColorCricleBulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
-            bullet(start, nextLineFeedOfStart - 1, true);
-            bullet(nextLineFeedOfStart + 1, end, true);
+            if(start == end && start == getEditableText().length()) {
+                start = start - 1;
+                end = end - 1;
+            }
+            clearBullet(start, end);
         }
-        //设置多行
-//        testColorCricleBulletSpan();
-        getEditableText().setSpan(new ColorCricleBulletSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        onSelectionChanged(start, end);
     }
 
     @Override
+    public void clearBullet(int start, int end) {
+        Log.i(TAG, "Try to clear bullet start = " + start + " end = " + end);
+        start = findLastLineStart(start);
+        ColorCricleBulletSpan[] spans = getEditableText().getSpans(start, end, ColorCricleBulletSpan.class);
+        for(ColorCricleBulletSpan span: spans) {
+            int spanStart = getEditableText().getSpanStart(span);
+            int spanEnd = getEditableText().getSpanEnd(span);
+            Log.i(TAG, "spanStart = " + spanStart + " spanEnd = " + spanEnd);
+            getEditableText().removeSpan(span);
+        }
+    }
+
+
+    @Override
     public boolean containBullet(int start, int end) {
+        start = findLastLineStart(start);
+        if(start == end && end == getEditableText().length()) {
+            end = end - 1;
+        }
         ColorCricleBulletSpan[] spans = getEditableText().getSpans(start, end, ColorCricleBulletSpan.class);
         if(spans != null && spans.length > 0) {
+            Log.i(TAG, "containBullet true");
             return true;
         } else {
+            Log.i(TAG, "containBullet false");
             return false;
         }
     }
@@ -318,7 +342,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         return getEditableText().toString();
     }
 
-    private void testColorCricleBulletSpan() {
+    private void printColorCricleBulletSpan() {
         ColorCricleBulletSpan[] spans = getEditableText().getSpans(0, getEditableText().length(), ColorCricleBulletSpan.class);
         for(ColorCricleBulletSpan span: spans) {
             int start = getEditableText().getSpanStart(span);
@@ -335,7 +359,52 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
-        Log.i(TAG, "onTextChanged ");
-        setSelection(getText().toString().length());
+        int currLineCount = getLineCount();
+        Log.i(TAG, "onTextChanged line count = " + currLineCount + " start = " + start);
+        if(currLineCount == 1 + lastLineCount) {
+            if(last().equals(LINE_FEED)) {
+
+            } else {
+                resetCurrBullet(start);
+            }
+        } else {
+
+        }
+        lastLineCount = currLineCount;
     }
+
+    private void resetCurrBullet(int where) {
+        Log.i(TAG, "resetCurrBullet clearBullet");
+        int lineStart = findLastLineStart(where);
+        clearBullet(lineStart, lineStart);
+        Log.i(TAG, "resetCurrBullet bullet again");
+        bullet(lineStart, lineStart, true);
+    }
+
+    private int findLastLineStart(int where) {
+        String partContent = content().substring(0, where);
+        int index = partContent.lastIndexOf(LINE_FEED);
+        index = index + 1;
+        Log.i(TAG, "findLastLineStart index = " + index);
+        return index;
+    }
+
+    private int findNextLineFeed(int where) {
+        int index = content().substring(where).indexOf(LINE_FEED);
+        if (index == -1) {
+            index = content().length() - 1;
+        } else {
+            index += where;
+        }
+        return index;
+    }
+
+    private String last(){
+        if(content().isEmpty()) {
+            return null;
+        } else {
+            return content().substring(content().length() - 1);
+        }
+    }
+
 }
