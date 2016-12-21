@@ -144,14 +144,6 @@
                 android:background="?android:selectableItemBackground">
             </ImageButton>
 
-            <ImageButton android:id="@+id/clear"
-                android:contentDescription="@null"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/format_clear"
-                android:scaleType="center"
-                android:background="?android:selectableItemBackground">
-            </ImageButton>
 
         </LinearLayout>
 

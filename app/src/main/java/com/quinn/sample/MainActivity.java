@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.ColorInt;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -19,6 +20,7 @@ import android.widget.ImageButton;
 import com.quinn.riven.RivenText;
 import com.quinn.riven.utils.UIUtils;
 import com.quinn.sample.view.SelectableImageButton;
+import com.thebluealliance.spectrum.SpectrumDialog;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,26 +34,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int CHOOSE_PICTURE = 100;
 
-    public static final int[] colors = {
-            R.color.pink,
-            R.color.purple,
-            R.color.deep_purple,
-            R.color.indigo,
-            R.color.blue,
-            R.color.light_blue,
-            R.color.cyan,
-            R.color.teal,
-            R.color.green,
-            R.color.light_green,
-            R.color.lime,
-            R.color.yellow,
-            R.color.amber,
-            R.color.orange,
-            R.color.deep_orange,
-            R.color.brown,
-            R.color.grey,
-            R.color.blue_grey
-    };
 
     private RivenText rivenText;
     private Button format;
@@ -65,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton checkBoxBtn;
     private SelectableImageButton colorBtn;
     private SelectableImageButton quoteBtn;
-    private ImageButton clearBtn;
     private SelectableImageButton bulletBtn;
     private ImageButton numericBtn;
     private ImageButton linkBtn;
@@ -83,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         imageBtn = (ImageButton) findViewById(photo);
         colorBtn = (SelectableImageButton) findViewById(R.id.color);
         quoteBtn = (SelectableImageButton) findViewById(R.id.quote);
-        clearBtn = (ImageButton) findViewById(R.id.clear);
         bulletBtn = (SelectableImageButton) findViewById(R.id.bullet);
         numericBtn = (ImageButton) findViewById(R.id.number);
         linkBtn = (ImageButton) findViewById(R.id.link);
@@ -166,13 +146,6 @@ public class MainActivity extends AppCompatActivity {
                 link();
             }
         });
-        clearBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateSelectArea();
-                clear();
-            }
-        });
 
         rivenText.setSelectChangeListener(new RivenText.SelectChangeListener() {
             @Override
@@ -213,7 +186,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void color() {
-        rivenText.foreColor(UIUtils.getColorWrapper(this, R.color.colorPrimary), start, end, !colorBtn.isCheck());
+        if(colorBtn.isCheck()) {
+            rivenText.foreColor(UIUtils.getColorWrapper(this, R.color.colorPrimary), start, end, false);
+        }else {
+            new SpectrumDialog.Builder(this)
+                    .setColors(R.array.demo_colors)
+                    .setSelectedColorRes(R.color.red)
+                    .setDismissOnColorSelected(true)
+                    .setOutlineWidth(2)
+                    .setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
+                        @Override
+                        public void onColorSelected(boolean positiveResult, @ColorInt int color) {
+                            rivenText.foreColor(color, start, end, true);
+                        }
+                    }).build().show(MainActivity.this.getSupportFragmentManager(), "dialog_demo_1");
+        }
     }
 
     private void quote() {
