@@ -1,4 +1,4 @@
-package com.tencent.richeditor;
+package com.quinn.sample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,13 +13,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-import com.tencent.richeditor.view.RivenText;
-import com.tencent.richeditor.view.SelectableImageButton;
+import com.quinn.riven.RivenText;
+import com.quinn.sample.view.SelectableImageButton;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static com.tencent.richeditor.R.id.photo;
+import static com.quinn.sample.R.id.photo;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imageBtn;
     private ImageButton checkBoxBtn;
     private ImageButton colorBtn;
-    private ImageButton quoteBtn;
+    private SelectableImageButton quoteBtn;
     private ImageButton clearBtn;
     private SelectableImageButton bulletBtn;
     private ImageButton numericBtn;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         strikethroughBtn = (SelectableImageButton) findViewById(R.id.strikethrough);
         imageBtn = (ImageButton) findViewById(photo);
         colorBtn = (ImageButton) findViewById(R.id.color);
-        quoteBtn = (ImageButton) findViewById(R.id.quote);
+        quoteBtn = (SelectableImageButton) findViewById(R.id.quote);
         clearBtn = (ImageButton) findViewById(R.id.clear);
         bulletBtn = (SelectableImageButton) findViewById(R.id.bullet);
         numericBtn = (ImageButton) findViewById(R.id.number);
@@ -191,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void quote() {
+        rivenText.quote(start, end, !quoteBtn.isCheck());
 
     }
     private void bullet() {
@@ -216,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         underlineBtn.setCheck(rivenText.containUnderLine(start, end));
         strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
         bulletBtn.setCheck(rivenText.containBullet(start, end));
+        quoteBtn.setCheck(rivenText.containQuote(start, end));
     }
 
     /**

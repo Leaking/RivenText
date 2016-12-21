@@ -1,4 +1,4 @@
-package com.tencent.richeditor.view;
+package com.quinn.riven;
 
 import android.graphics.Bitmap;
 
@@ -37,6 +37,13 @@ public interface FormatInterface {
     public void number(int start, int end, boolean format);
 
     public boolean containNumber(int start, int end);
+
+    public void quote(int start, int end, boolean format);
+
+    public void clearQuote(int start, int end);
+
+    public boolean containQuote(int start, int end);
+
 
 
 }

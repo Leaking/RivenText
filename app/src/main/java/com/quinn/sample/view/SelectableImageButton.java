@@ -1,12 +1,12 @@
-package com.tencent.richeditor.view;
+package com.quinn.sample.view;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import com.tencent.richeditor.R;
-import com.tencent.richeditor.utils.UIUtils;
+import com.quinn.sample.R;
 
 /**
  * Created by quinn on 11/29/16.
@@ -35,7 +35,7 @@ public class SelectableImageButton extends android.support.v7.widget.AppCompatIm
     public void setCheck(boolean check) {
         selected = check;
         if(selected) {
-            this.setBackgroundColor(UIUtils.getColorWrapper(getContext(), R.color.colorAccent));
+            this.setBackgroundColor(getColorWrapper(getContext(), R.color.colorAccent));
         } else {
             this.setBackgroundColor(Color.TRANSPARENT);
         }
@@ -44,7 +44,7 @@ public class SelectableImageButton extends android.support.v7.widget.AppCompatIm
     private void toggle() {
         selected = !selected;
         if(selected) {
-            this.setBackgroundColor(UIUtils.getColorWrapper(getContext(), R.color.colorAccent));
+            this.setBackgroundColor(getColorWrapper(getContext(), R.color.colorAccent));
         } else {
             this.setBackgroundColor(Color.TRANSPARENT);
         }
@@ -53,5 +53,13 @@ public class SelectableImageButton extends android.support.v7.widget.AppCompatIm
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return super.onTouchEvent(event);
+    }
+
+    private int getColorWrapper(Context context, int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return context.getColor(id);
+        } else {
+            return context.getResources().getColor(id);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.tencent.richeditor.span;
+package com.quinn.riven.span;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -7,7 +7,8 @@ import android.support.annotation.DrawableRes;
 import android.text.style.ImageSpan;
 import android.util.Log;
 
-import com.tencent.richeditor.R;
+import com.quinn.riven.R;
+
 
 /**
  * Created by quinn on 11/30/16.

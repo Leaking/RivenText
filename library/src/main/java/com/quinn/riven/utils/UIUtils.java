@@ -1,4 +1,4 @@
-package com.tencent.richeditor.utils;
+package com.quinn.riven.utils;
 
 import android.content.Context;
 import android.graphics.Point;

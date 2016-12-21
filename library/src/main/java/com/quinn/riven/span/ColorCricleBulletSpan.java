@@ -1,4 +1,4 @@
-package com.tencent.richeditor.span;
+package com.quinn.riven.span;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
