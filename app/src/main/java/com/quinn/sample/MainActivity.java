@@ -1,19 +1,23 @@
 package com.quinn.sample;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.quinn.riven.RivenText;
+import com.quinn.riven.utils.UIUtils;
 import com.quinn.sample.view.SelectableImageButton;
 
 import java.io.FileNotFoundException;
@@ -28,6 +32,27 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int CHOOSE_PICTURE = 100;
 
+    public static final int[] colors = {
+            R.color.pink,
+            R.color.purple,
+            R.color.deep_purple,
+            R.color.indigo,
+            R.color.blue,
+            R.color.light_blue,
+            R.color.cyan,
+            R.color.teal,
+            R.color.green,
+            R.color.light_green,
+            R.color.lime,
+            R.color.yellow,
+            R.color.amber,
+            R.color.orange,
+            R.color.deep_orange,
+            R.color.brown,
+            R.color.grey,
+            R.color.blue_grey
+    };
+
     private RivenText rivenText;
     private Button format;
     private int start;
@@ -38,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private SelectableImageButton strikethroughBtn;
     private ImageButton imageBtn;
     private ImageButton checkBoxBtn;
-    private ImageButton colorBtn;
+    private SelectableImageButton colorBtn;
     private SelectableImageButton quoteBtn;
     private ImageButton clearBtn;
     private SelectableImageButton bulletBtn;
@@ -56,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         underlineBtn = (SelectableImageButton) findViewById(R.id.underline);
         strikethroughBtn = (SelectableImageButton) findViewById(R.id.strikethrough);
         imageBtn = (ImageButton) findViewById(photo);
-        colorBtn = (ImageButton) findViewById(R.id.color);
+        colorBtn = (SelectableImageButton) findViewById(R.id.color);
         quoteBtn = (SelectableImageButton) findViewById(R.id.quote);
         clearBtn = (ImageButton) findViewById(R.id.clear);
         bulletBtn = (SelectableImageButton) findViewById(R.id.bullet);
@@ -188,13 +213,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void color() {
-
+        rivenText.foreColor(UIUtils.getColorWrapper(this, R.color.colorPrimary), start, end, !colorBtn.isCheck());
     }
 
     private void quote() {
         rivenText.quote(start, end, !quoteBtn.isCheck());
-
     }
+
     private void bullet() {
         rivenText.bullet(start, end, !bulletBtn.isCheck());
     }
@@ -204,7 +229,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void link() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.url);
 
+        View view = getLayoutInflater().inflate(R.layout.dialog_input_link, null, false);
+        builder.setView(view);
+
+        final EditText editText = (EditText) view.findViewById(R.id.url);
+        editText.setSelection(editText.getText().length());
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                rivenText.link(editText.getText().toString(), start);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
     private void clear() {
@@ -219,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
         strikethroughBtn.setCheck(rivenText.containStrikeThrough(start, end));
         bulletBtn.setCheck(rivenText.containBullet(start, end));
         quoteBtn.setCheck(rivenText.containQuote(start, end));
+        colorBtn.setCheck(rivenText.containForeColor(start, end));
     }
 
     /**

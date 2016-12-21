@@ -8,6 +8,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import com.quinn.riven.span.CheckBoxSpan;
 import com.quinn.riven.span.ColorCricleBulletSpan;
 import com.quinn.riven.span.ColorQuoteSpan;
+import com.quinn.riven.span.RivenURLSpan;
 import com.quinn.riven.utils.UIUtils;
 
 import java.util.Arrays;
@@ -33,6 +35,8 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     public static final String TAG = "RivenText";
 
     private String LINE_FEED = "\n";
+
+    private String EMPTY_SPACE = " ";
 
     private int lastLineCount = 1;
 
@@ -201,6 +205,42 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
             return false;
         }
         StrikethroughSpan[] spans = getEditableText().getSpans(start, end, StrikethroughSpan.class);
+        if(spans != null && spans.length > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void foreColor(int color, int start, int end, boolean format) {
+        if(format) {
+            getEditableText().setSpan(new ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            ForegroundColorSpan[] spans = getEditableText().getSpans(start, end, ForegroundColorSpan.class);
+            if(spans != null && spans.length > 0) {
+                for (ForegroundColorSpan span : spans) {
+                    int spanStart = getEditableText().getSpanStart(span);
+                    int spanEnd = getEditableText().getSpanEnd(span);
+                    getEditableText().removeSpan(span);
+                    if(spanStart < start) {
+                        foreColor(color, spanStart, start, true);
+                    }
+                    if(spanEnd > end) {
+                        foreColor(color, end, spanEnd, true);
+                    }
+                }
+            }
+        }
+        onSelectionChanged(start, end);
+    }
+
+    @Override
+    public boolean containForeColor(int start, int end) {
+        if(start == end) {
+            return false;
+        }
+        ForegroundColorSpan[] spans = getEditableText().getSpans(start, end, ForegroundColorSpan.class);
         if(spans != null && spans.length > 0) {
             return true;
         } else {
@@ -387,6 +427,15 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         }
     }
 
+    @Override
+    public void link(String url, int start) {
+        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(url);
+        RivenURLSpan urlSpan = new RivenURLSpan(url);
+        spannableStringBuilder.setSpan(urlSpan, 0, spannableStringBuilder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        setMovementMethod(LinkMovementMethod.getInstance());
+        getEditableText().insert(start, spannableStringBuilder);
+        insertEmptySpace();
+    }
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
@@ -493,9 +542,12 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         }
     }
 
-
     private void insertLineFeed() {
         getEditableText().insert(content().length(), LINE_FEED);
+    }
+
+    private void insertEmptySpace() {
+        getEditableText().insert(content().length(), EMPTY_SPACE);
     }
 
 }

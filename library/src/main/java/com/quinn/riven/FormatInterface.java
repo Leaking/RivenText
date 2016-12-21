@@ -24,6 +24,10 @@ public interface FormatInterface {
 
     public boolean containStrikeThrough(int start, int end);
 
+    public void foreColor(int color, int start, int end, boolean format);
+
+    public boolean containForeColor(int start, int end);
+
     public void addCheckBox(int start, boolean check);
 
     public void addPhoto(int start, Bitmap bitmap);
@@ -43,6 +47,8 @@ public interface FormatInterface {
     public void clearQuote(int start, int end);
 
     public boolean containQuote(int start, int end);
+
+    public void link(String url, int start);
 
 
 

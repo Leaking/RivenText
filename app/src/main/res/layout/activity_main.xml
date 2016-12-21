@@ -117,14 +117,14 @@
                 android:background="?android:selectableItemBackground">
             </com.quinn.sample.view.SelectableImageButton>
 
-            <ImageButton android:id="@+id/color"
+            <com.quinn.sample.view.SelectableImageButton android:id="@+id/color"
                 android:contentDescription="@null"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/format_color"
                 android:scaleType="center"
                 android:background="?android:selectableItemBackground">
-            </ImageButton>
+            </com.quinn.sample.view.SelectableImageButton>
 
             <ImageButton android:id="@+id/link"
                 android:contentDescription="@null"
