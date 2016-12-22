@@ -487,16 +487,14 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
         int currLineCount = getLineCount();
-        Log.i(TAG, "onTextChanged line count = " + currLineCount + " start = " + start);
+        Log.i(TAG, "onTextChanged line currlinecount = " + currLineCount + " lastLineCount = " + lastLineCount + " start = " + start);
         if(currLineCount > lastLineCount) {
             int lastLineStart = findLastLineStart(start);
-            if(!last().equals(LINE_FEED)) {
-                if(containBullet(lastLineStart, lastLineStart)) {
-                    resetCurrBullet(start);
-                }
-                if(containQuote(lastLineStart, lastLineStart)) {
-                    resetCurrQuote(start);
-                }
+            if(containBullet(lastLineStart, lastLineStart)) {
+                resetCurrBullet(start);
+            }
+            if(containQuote(lastLineStart, lastLineStart)) {
+                resetCurrQuote(start);
             }
         } else {
 
@@ -505,12 +503,14 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     }
 
     private void resetCurrBullet(int where) {
+        Log.i(TAG, "resetCurrBullet");
         int lineStart = findLastLineStart(where);
         clearBullet(lineStart, lineStart);
         bullet(lineStart, lineStart, true);
     }
 
     private void resetCurrQuote(int where) {
+        Log.i(TAG, "resetCurrBullet");
         int lineStart = findLastLineStart(where);
         clearQuote(lineStart, lineStart);
         quote(lineStart, lineStart, true);
@@ -525,9 +525,13 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     }
 
     private int findNextLineFeed(int where) {
+        int length = content().length();
+        if(length == 0) {
+            return 0;
+        }
         int index = content().substring(where).indexOf(LINE_FEED);
         if (index == -1) {
-            index = content().length() - 1;
+            index = content().length();
         } else {
             index += where;
         }
@@ -549,5 +553,4 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     private void insertEmptySpace() {
         getEditableText().insert(content().length(), EMPTY_SPACE);
     }
-
 }
