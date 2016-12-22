@@ -3,6 +3,8 @@ package com.quinn.riven;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -16,6 +18,7 @@ import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.quinn.riven.span.CheckBoxSpan;
@@ -295,6 +298,9 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     public void bullet(int start, int end, boolean format) {
         if(format) {
+            if(containQuote(start, end)) {
+                clearQuote(start, end);
+            }
             String content = content();
             Log.i(TAG, "Try to bullet start = " + start + " end = " + end);
             int nextLineFeedOfStart = content.indexOf(this.LINE_FEED, start);
@@ -368,6 +374,9 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     public void quote(int start, int end, boolean format) {
         if(format) {
+            if(containBullet(start, end)) {
+                clearBullet(start, end);
+            }
             String content = content();
             Log.i(TAG, "Try to quote start = " + start + " end = " + end);
             int nextLineFeedOfStart = content.indexOf(this.LINE_FEED, start);
@@ -552,5 +561,17 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     private void insertEmptySpace() {
         getEditableText().insert(content().length(), EMPTY_SPACE);
+    }
+
+    private int getCurrentCursorLine(EditText editText)
+    {
+        int selectionStart = Selection.getSelectionStart(editText.getText());
+        Layout layout = editText.getLayout();
+
+        if (!(selectionStart == -1)) {
+            return layout.getLineForOffset(selectionStart);
+        }
+
+        return -1;
     }
 }
