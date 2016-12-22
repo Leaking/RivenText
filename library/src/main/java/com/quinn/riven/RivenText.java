@@ -250,7 +250,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public void addCheckBox(int start, boolean check) {
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("checkboxspan");
+        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder("        ");
         final CheckBoxSpan span = new CheckBoxSpan(this.getContext(), check);
         spannableStringBuilder.setSpan(span, 0, spannableStringBuilder.length() , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         spannableStringBuilder.setSpan(new ClickableSpan() {

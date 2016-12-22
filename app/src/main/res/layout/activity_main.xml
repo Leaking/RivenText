@@ -103,7 +103,6 @@
                 android:layout_height="48dp"
                 android:src="@drawable/check_box"
                 android:scaleType="center"
-                android:visibility="gone"
                 android:background="?android:selectableItemBackground">
             </ImageButton>
 
