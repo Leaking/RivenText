@@ -8,6 +8,7 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -37,9 +38,9 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     public static final String TAG = "RivenText";
 
-    private String LINE_FEED = "\n";
+    private static final String LINE_FEED = "\n";
 
-    private String EMPTY_SPACE = " ";
+    private static final String EMPTY_SPACE = " ";
 
     private int lastLineCount = 1;
 
@@ -309,7 +310,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
             //设置当前行
             if (nextLineFeedOfStart == nextLineFeedOfEnd) {
                 Log.i(TAG, "Bullet the same line");
-                int lineFeedBeforeStart = findLastLineStart(start);
+                int lineFeedBeforeStart = findLineStart(start);
                 int lineFeedAfterEnd = findNextLineFeed(end);
                 start = lineFeedBeforeStart;
                 end = lineFeedAfterEnd;
@@ -334,7 +335,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     public void clearBullet(int start, int end) {
         Log.i(TAG, "Try to clear bullet start = " + start + " end = " + end);
-        start = findLastLineStart(start);
+        start = findLineStart(start);
         ColorCricleBulletSpan[] spans = getEditableText().getSpans(start, end, ColorCricleBulletSpan.class);
         for(ColorCricleBulletSpan span: spans) {
             int spanStart = getEditableText().getSpanStart(span);
@@ -347,7 +348,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public boolean containBullet(int start, int end) {
-        start = findLastLineStart(start);
+        start = findLineStart(start);
         if(start == end && end == getEditableText().length()) {
             end = end - 1;
         }
@@ -363,7 +364,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public void number(int start, int end, boolean format) {
-
+        Log.i(TAG, "getCurrentCursorLine = " + getCurrentCursorLine(this));
     }
 
     @Override
@@ -385,7 +386,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
             //设置当前行
             if (nextLineFeedOfStart == nextLineFeedOfEnd) {
                 Log.i(TAG, "quote the same line");
-                int lineFeedBeforeStart = findLastLineStart(start);
+                int lineFeedBeforeStart = findLineStart(start);
                 int lineFeedAfterEnd = findNextLineFeed(end);
                 start = lineFeedBeforeStart;
                 end = lineFeedAfterEnd;
@@ -410,7 +411,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     public void clearQuote(int start, int end) {
         Log.i(TAG, "Try to clear quote start = " + start + " end = " + end);
-        start = findLastLineStart(start);
+        start = findLineStart(start);
         ColorQuoteSpan[] spans = getEditableText().getSpans(start, end, ColorQuoteSpan.class);
         for(ColorQuoteSpan span: spans) {
             int spanStart = getEditableText().getSpanStart(span);
@@ -422,7 +423,7 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
 
     @Override
     public boolean containQuote(int start, int end) {
-        start = findLastLineStart(start);
+        start = findLineStart(start);
         if(start == end && end == getEditableText().length()) {
             end = end - 1;
         }
@@ -495,12 +496,30 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
+        Log.i(TAG, "start = " + start + " lengthBefore = " + lengthBefore + " lengthAfter = " + lengthAfter);
+//        if(containBullet(start + lengthAfter, start + lengthAfter + 1)) {
+//            boolean isLineStart = start == 0 || charBefore(start).equals(LINE_FEED);
+//            Log.i(TAG, "isLineStart = " + isLineStart);
+//            if(isLineStart && !last().equals(EMPTY_SPACE)) {
+//                clearBullet(start + lengthAfter, start + lengthAfter);
+//                bullet(start, start, true);
+//                return;
+//            }
+//        }
         int currLineCount = getLineCount();
         Log.i(TAG, "onTextChanged line currlinecount = " + currLineCount + " lastLineCount = " + lastLineCount + " start = " + start);
         if(currLineCount > lastLineCount) {
-            int lastLineStart = findLastLineStart(start);
+            int lastLineStart = findLineStart(start);
             if(containBullet(lastLineStart, lastLineStart)) {
-                resetCurrBullet(start);
+                if(!lastInput().equals(LINE_FEED)) {
+                    resetCurrBullet(start);
+                } else {
+                    //回车换行自动补上列表节点
+//                    Log.i(TAG, "Input line feed");
+//                    insertEmptySpaceInSelection();
+//                    bullet(getSelectionEnd(), getSelectionEnd(), true);
+//                    setSelection(getSelectionEnd() - 1);
+                }
             }
             if(containQuote(lastLineStart, lastLineStart)) {
                 resetCurrQuote(start);
@@ -511,25 +530,31 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         lastLineCount = currLineCount;
     }
 
+
+
     private void resetCurrBullet(int where) {
         Log.i(TAG, "resetCurrBullet");
-        int lineStart = findLastLineStart(where);
+        int lineStart = findLineStart(where);
         clearBullet(lineStart, lineStart);
         bullet(lineStart, lineStart, true);
     }
 
     private void resetCurrQuote(int where) {
         Log.i(TAG, "resetCurrBullet");
-        int lineStart = findLastLineStart(where);
+        int lineStart = findLineStart(where);
         clearQuote(lineStart, lineStart);
         quote(lineStart, lineStart, true);
     }
 
-    private int findLastLineStart(int where) {
+    private int findLineStart(int where) {
+        Log.i(TAG, "findLineStart " + where);
         String partContent = content().substring(0, where);
+        if(TextUtils.isEmpty(partContent)) {
+            return 0;
+        }
         int index = partContent.lastIndexOf(LINE_FEED);
         index = index + 1;
-        Log.i(TAG, "findLastLineStart index = " + index);
+        Log.i(TAG, "findLineStart index = " + index);
         return index;
     }
 
@@ -555,12 +580,28 @@ public class RivenText extends android.support.v7.widget.AppCompatEditText imple
         }
     }
 
+    private String lastInput(){
+        if(content().isEmpty()) {
+            return null;
+        } else {
+            return content().charAt(getSelectionEnd() - 1) + "";
+        }
+    }
+
+    private String charBefore(int index) {
+        return content().charAt(index - 1) + "";
+    }
+
     private void insertLineFeed() {
         getEditableText().insert(content().length(), LINE_FEED);
     }
 
     private void insertEmptySpace() {
         getEditableText().insert(content().length(), EMPTY_SPACE);
+    }
+
+    private void insertEmptySpaceInSelection() {
+        getEditableText().insert(getSelectionEnd(), EMPTY_SPACE);
     }
 
     private int getCurrentCursorLine(EditText editText)

@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void number() {
-
+        rivenText.number(start, end, true);
     }
 
     private void link() {
